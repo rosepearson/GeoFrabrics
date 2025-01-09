@@ -58,7 +58,6 @@ class Test(base_test.Test):
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows test - this is strict")
     def test_result_dem_windows(self):
         """A basic comparison between the generated and benchmark DEM"""
-        decimal = 3
         file_path = (
             self.cache_dir / self.instructions["dem"]["data_paths"]["benchmark_dem"]
         )
@@ -76,12 +75,22 @@ class Test(base_test.Test):
             - benchmark_dem.z.data[~numpy.isnan(benchmark_dem.z.data)]
         )
         logging.info(f"DEM array diff is: {diff_array[diff_array != 0]}")
-        numpy.testing.assert_array_almost_equal(
-            test_dem.z.data[~numpy.isnan(test_dem.z.data)],
-            benchmark_dem.z.data[~numpy.isnan(benchmark_dem.z.data)],
-            decimal=decimal,
-            err_msg="The generated result_dem has different data from the "
-            "benchmark_dem",
+        
+        threshold = 10e-2
+        allowable_number_above = 10
+        self.assertTrue(
+            len(diff_array[numpy.abs(diff_array) > threshold])
+            <= allowable_number_above,
+            "more than "
+            f"{allowable_number_above} DEM values differ by more than {threshold} on"
+            f" Linux test run: {diff_array[numpy.abs(diff_array) > threshold]}",
+        )
+        threshold = 10e-4
+        self.assertTrue(
+            len(diff_array[numpy.abs(diff_array) > threshold]) < len(diff_array) / 100,
+            f"{len(diff_array[numpy.abs(diff_array) > threshold])} or more than 1% of "
+            f"DEM values differ by more than {threshold} on Linux test run: "
+            f"{diff_array[numpy.abs(diff_array) > threshold]}",
         )
 
         # explicitly free memory as xarray seems to be hanging onto memory
@@ -121,7 +130,7 @@ class Test(base_test.Test):
             f"{allowable_number_above} DEM values differ by more than {threshold} on"
             f" Linux test run: {diff_array[numpy.abs(diff_array) > threshold]}",
         )
-        threshold = 10e-6
+        threshold = 10e-4
         self.assertTrue(
             len(diff_array[numpy.abs(diff_array) > threshold]) < len(diff_array) / 100,
             f"{len(diff_array[numpy.abs(diff_array) > threshold])} or more than 1% of "

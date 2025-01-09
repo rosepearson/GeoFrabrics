@@ -166,7 +166,7 @@
 			"lidar_classifications_to_keep": [2, 9],
 			"interpolation": {"no_data": "linear", "ocean": "linear"},
             "filter_waterways_by_osm_ids": [200394974],
-            "ocean": {"use_edge": true, "is_depth": true, "nearest_k_for_interpolation": 50}
+            "use_edge": {"ocean": true}, "is_depth": {"ocean": true}, "nearest_k_for_interpolation": {"ocean": 50}
 		}
 	},
 	"roughness":
